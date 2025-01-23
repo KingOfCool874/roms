@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ROMs Repository</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .console { margin-bottom: 20px; }
+        .console h2 { cursor: pointer; }
+        .games { display: none; margin-left: 20px; }
+    </style>
+</head>
+<body>
+    <h1>ROMs Repository</h1>
+    <div id="consoles"></div>
+
+    <script>
+        const consoles = [
+            'atari2600',
+            'atari7800',
+            'atarilynx',
+            'fds',
+            'gamegear',
+            'gb',
+            'gba',
+            'gbc',
+            'mastersystem',
+            'n64',
+            'nes',
+            'ngp',
+            'ngpc',
+            'pcengine',
+            'sega32x',
+            'sg-1000',
+            'snes'
+        ];
+
+        const baseUrl = 'https://github.com/KingOfCool874/roms/blob/master/';
+
+        const consolesDiv = document.getElementById('consoles');
+
+        consoles.forEach(console => {
+            const consoleDiv = document.createElement('div');
+            consoleDiv.className = 'console';
+
+            const consoleHeader = document.createElement('h2');
+            consoleHeader.textContent = console.toUpperCase();
+            consoleHeader.onclick = () => {
+                const gamesList = consoleDiv.querySelector('.games');
+                gamesList.style.display = gamesList.style.display === 'none' ? 'block' : 'none';
+            };
+
+            const gamesList = document.createElement('ul');
+            gamesList.className = 'games';
+
+            // Fetch the list of games for this console
+            fetch(`${baseUrl}${console}`)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const gameLinks = doc.querySelectorAll('.js-navigation-open');
+
+                    gameLinks.forEach(link => {
+                        const gameName = link.textContent.trim();
+                        const gameUrl = link.href.replace('/blob/', '/raw/');
+
+                        const listItem = document.createElement('li');
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = gameUrl;
+                        downloadLink.textContent = gameName;
+                        downloadLink.download = gameName;
+
+                        listItem.appendChild(downloadLink);
+                        gamesList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    const errorMessage = document.createElement('p');
+                    errorMessage.textContent = 'Error fetching games list.';
+                    gamesList.appendChild(errorMessage);
+                });
+
+            consoleDiv.appendChild(consoleHeader);
+            consoleDiv.appendChild(gamesList);
+            consolesDiv.appendChild(consoleDiv);
+        });
+    </script>
+</body>
+</html>
